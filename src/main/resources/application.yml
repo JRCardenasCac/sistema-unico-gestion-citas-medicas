@@ -1,0 +1,40 @@
+# Configuración de logging
+logging:
+  file: sugcm.log # Nombre del archivo de registro (opcional)
+  level:
+    root: INFO  # Nivel de log global (puede ser TRACE, DEBUG, INFO, WARN o ERROR)
+# Configuración del servidor web incorporado
+server:
+  port: 8080  # Puerto en el que se ejecutará el servidor web
+  servlet:
+    context-path: / # Ruta base para las solicitudes HTTP
+spring:
+  application:
+    name: sistema-unico-gestion-citas-medicas # Nombre de la aplicación
+  # Configuración de la conexión a PostgreSQL
+  datasource:
+    url: jdbc:postgresql://localhost:5432/db_sugcm  # URL de la base de datos
+    username: postgres  # Nombre de usuario de la base de datos
+    password: sql123  # Contraseña de la base de datos
+    driver-class-name: org.postgresql.Driver  # Clase del controlador de la base de datos
+  jpa:
+    hibernate:
+      ddl-auto: update # Acción de actualización del esquema de la base de datos
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect # Dialecto de Hibernate para PostgreSQL
+        format_sql: true
+    show-sql: true  # Mostrar sentencias SQL ejecutadas por Hibernate en la consola
+  main:
+    banner-mode: off  # Desactivar el banner de inicio de Spring Boot
+  # Configuración de CORS (si es necesario permitir el acceso cruzado a recursos)
+  webflux:
+    cors:
+      allowed-origins: '*'  # Permitir el acceso desde cualquier origen (para desarrollo)
+application:
+  security:
+    jwt:
+      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      expiration: 86400000 # a day
+      refresh-token:
+        expiration: 604800000 # 7 days
