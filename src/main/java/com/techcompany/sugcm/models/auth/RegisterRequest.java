@@ -1,17 +1,16 @@
 package com.techcompany.sugcm.models.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.techcompany.sugcm.models.entity.User;
-import jakarta.persistence.Column;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-
-@EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRequest extends User {
+public class RegisterRequest {
     private String name;
     private String lastname;
     @JsonProperty("mobile_phone")

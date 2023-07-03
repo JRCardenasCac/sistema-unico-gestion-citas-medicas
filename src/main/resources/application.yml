@@ -19,7 +19,7 @@ spring:
     driver-class-name: org.postgresql.Driver  # Clase del controlador de la base de datos
   jpa:
     hibernate:
-      ddl-auto: update # Acción de actualización del esquema de la base de datos
+      ddl-auto: create-drop # Acción de actualización del esquema de la base de datos
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect # Dialecto de Hibernate para PostgreSQL

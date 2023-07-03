@@ -4,10 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.techcompany.sugcm.models.auth.AuthenticationRequest;
 import com.techcompany.sugcm.models.auth.AuthenticationResponse;
 import com.techcompany.sugcm.models.auth.RegisterRequest;
+import com.techcompany.sugcm.models.entity.Role;
 import com.techcompany.sugcm.models.entity.Token;
 import com.techcompany.sugcm.models.entity.User;
+import com.techcompany.sugcm.models.entity.UserRole;
+import com.techcompany.sugcm.repositories.RoleRepository;
 import com.techcompany.sugcm.repositories.TokenRepository;
 import com.techcompany.sugcm.repositories.UserRepository;
+import com.techcompany.sugcm.repositories.UserRoleRepository;
 import com.techcompany.sugcm.services.AuthenticationService;
 import com.techcompany.sugcm.util.enums.TokenType;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,9 +20,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,11 +34,45 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final UserRoleRepository userRoleRepository;
+    private final PasswordEncoder passwordEncoder;
     private final TokenRepository tokenRepository;
 
     @Override
-    public AuthenticationResponse register(RegisterRequest request) {
-        return null;
+    @Transactional(rollbackFor = Exception.class)
+    public AuthenticationResponse register(RegisterRequest request) throws Exception {
+        Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
+        if (existingUser.isPresent()) {
+            throw new Exception("El " + existingUser.get().getProfile() + " ya se encuentra registrado.");
+        } else {
+            Optional<Role> role = roleRepository.findByName(request.getProfile());
+            if (role.isPresent()) {
+                var user = User.builder()
+                        .name(request.getName())
+                        .lastname(request.getLastname())
+                        .mobilePhone(request.getMobilePhone())
+                        .email(request.getEmail())
+                        .password(passwordEncoder.encode(request.getPassword()))
+                        .profile(request.getProfile())
+                        .build();
+                User savedUser = userRepository.save(user);
+                UserRole userRole = new UserRole();
+                userRole.setUser(savedUser);
+                userRole.setRole(role.get());
+                userRoleRepository.save(userRole);
+                var jwtToken = jwtService.generateToken(user);
+                var refreshToken = jwtService.generateRefreshToken(user);
+                saveUserToken(savedUser, jwtToken);
+
+                return AuthenticationResponse.builder()
+                        .accessToken(jwtToken)
+                        .refreshToken(refreshToken)
+                        .build();
+            } else {
+                throw new Exception("El rol del usuario es inválido.");
+            }
+        }
     }
 
     @Override
@@ -42,7 +83,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         request.getPassword()
                 )
         );
-        var user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+        var user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new RuntimeException("Usuario no existe."));
         var jwtToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
         revokeAllUserTokens(user);
