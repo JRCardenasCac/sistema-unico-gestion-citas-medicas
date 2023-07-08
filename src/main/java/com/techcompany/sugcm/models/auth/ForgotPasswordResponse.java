@@ -11,5 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ForgotPasswordResponse {
     private String message;
+    private String link;
+    private String token;
     private boolean status;
 }

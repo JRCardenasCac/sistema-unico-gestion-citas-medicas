@@ -133,11 +133,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             saveUserToken(user, token);
 
             // Send the password reset email with the token
-            sendPasswordResetEmail(user, token);
+            //sendPasswordResetEmail(user, token);
 
             return ForgotPasswordResponse.builder()
                     .message("Se autorizo el cambio de clave, revise su bandeja de correo.")
                     .status(Boolean.TRUE)
+                    .link("http://localhost:4200/recover-password?recover_password_token=" + token)
+                    .token(token)
                     .build();
         }
         throw new Exception("El correo no esta registrado.");
