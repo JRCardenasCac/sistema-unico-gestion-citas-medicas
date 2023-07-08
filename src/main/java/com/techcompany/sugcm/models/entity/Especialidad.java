@@ -6,15 +6,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
+//@Entity
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class Especialidad {
-    @Id
+    /*@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "especialidad_id")
     private Long especialidadId;
-    private String name;
+
+    private String name;*/
 }

@@ -6,18 +6,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
+//@Entity
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class Medico {
-    @Id
+    /*@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "medico_id")
     private Long medicoId;
-    @JoinColumn(name = "especialidad_id")
+
+    @JoinColumn(name = "fk_especialidad")
     private Especialidad especialidad;
-    @JoinColumn(name = "user_id")
-    private User user;
+
+    @JoinColumn(name = "fk_user")
+    private User user;*/
 }

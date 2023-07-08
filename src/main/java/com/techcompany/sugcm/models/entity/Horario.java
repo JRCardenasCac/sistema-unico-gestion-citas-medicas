@@ -6,19 +6,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
+//@Entity
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class Horario {
-    @Id
+    /*@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "horario_id")
     private Long horarioId;
     private String dia;
     private String jornada;
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fk_user")
+    private User user;*/
 }
