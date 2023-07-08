@@ -3,6 +3,7 @@ package com.techcompany.sugcm.services.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.techcompany.sugcm.models.auth.AuthenticationRequest;
 import com.techcompany.sugcm.models.auth.AuthenticationResponse;
+import com.techcompany.sugcm.models.auth.ForgotPasswordResponse;
 import com.techcompany.sugcm.models.auth.RegisterRequest;
 import com.techcompany.sugcm.models.entity.Role;
 import com.techcompany.sugcm.models.entity.Token;
@@ -38,6 +39,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRoleRepository userRoleRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenRepository tokenRepository;
+    private final EmailService emailService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -119,6 +121,28 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ForgotPasswordResponse requestNewPassword(String email) throws Exception {
+        Optional<User> existingUser = userRepository.findByEmail(email);
+        if (existingUser.isPresent()) {
+            var user = existingUser.get();
+            // Generate and store a password reset token
+            var token = jwtService.generateToken(user);
+            revokeAllUserTokens(user);
+            saveUserToken(user, token);
+
+            // Send the password reset email with the token
+            sendPasswordResetEmail(user, token);
+
+            return ForgotPasswordResponse.builder()
+                    .message("Se autorizo el cambio de clave, revise su bandeja de correo.")
+                    .status(Boolean.TRUE)
+                    .build();
+        }
+        throw new Exception("El correo no esta registrado.");
+    }
+
     private void revokeAllUserTokens(User user) {
         var validUserTokens = tokenRepository.findAllValidTokenByUserId(user.getUserId());
         if (validUserTokens.isEmpty())
@@ -139,5 +163,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .revoked(false)
                 .build();
         tokenRepository.save(token);
+    }
+
+    private void sendPasswordResetEmail(User user, String token) {
+        // Implement your logic to send the password reset email
+        String subject = "[SGCM]RECUPERACIÓN DE CLAVE";
+        String body = "Para resetear su contraseña ingrese al siguiente enlace: http://localhost:4200/recover-password?recover_password_token=" + token;
+        emailService.sendEmail(user.getEmail(), subject, body);
     }
 }

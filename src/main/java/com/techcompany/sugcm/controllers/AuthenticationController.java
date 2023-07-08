@@ -1,8 +1,6 @@
 package com.techcompany.sugcm.controllers;
 
-import com.techcompany.sugcm.models.auth.AuthenticationRequest;
-import com.techcompany.sugcm.models.auth.AuthenticationResponse;
-import com.techcompany.sugcm.models.auth.RegisterRequest;
+import com.techcompany.sugcm.models.auth.*;
 import com.techcompany.sugcm.services.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -10,16 +8,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
 @RestController
 @RequestMapping("/sugcm/v1/auth")
 @RequiredArgsConstructor
+@CrossOrigin(value = "*")
 public class AuthenticationController {
 
     private final AuthenticationService service;
@@ -45,5 +41,17 @@ public class AuthenticationController {
     @PostMapping("/refresh-token")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         service.refreshToken(request, response);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ForgotPasswordResponse> forgotPassword(@RequestBody ForgotPasswordRequest passwordRequest) throws Exception {
+        try {
+            return ResponseEntity.ok(service.requestNewPassword(passwordRequest.getEmail()));
+        } catch (Exception e) {
+            return ResponseEntity.ok(ForgotPasswordResponse.builder()
+                    .message(e.getMessage())
+                    .status(Boolean.FALSE)
+                    .build());
+        }
     }
 }
