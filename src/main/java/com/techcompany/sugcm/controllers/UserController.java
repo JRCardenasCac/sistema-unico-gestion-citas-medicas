@@ -2,6 +2,7 @@ package com.techcompany.sugcm.controllers;
 
 import com.techcompany.sugcm.models.dto.UserDto;
 import com.techcompany.sugcm.models.entity.User;
+import com.techcompany.sugcm.models.requests.DoctorRequest;
 import com.techcompany.sugcm.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,11 +13,12 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/sugcm/v1/users")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
+
     @GetMapping("/test")
     public ResponseEntity<String> test() {
         return ResponseEntity.ok("Hola mundo");
@@ -33,20 +35,38 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public ResponseEntity<UserDto> createUser(@RequestBody User user) throws Exception {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.saveUser(user));
+    @PostMapping("/administrators")
+    public ResponseEntity<UserDto> createAdministrator(@RequestBody User user) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(userService.saveAdministrator(user));
+        } catch (Exception e) {
+            return ResponseEntity.ok(UserDto.builder().message(e.getMessage()).build());
+        }
     }
 
+    @PostMapping("/doctors")
+    public ResponseEntity<UserDto> createDoctor(@RequestBody DoctorRequest doctorRequest) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(userService.saveDoctor(doctorRequest));
+        } catch (Exception e) {
+            return ResponseEntity.ok(UserDto.builder().message(e.getMessage()).build());
+        }
+    }
+
+
     @PutMapping("/{id}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody User user) throws Exception {
-        Optional<UserDto> existingUser = userService.getUserById(id);
-        if (existingUser.isPresent()) {
-            user.setUserId(id);
-            UserDto updatedUser = userService.saveUser(user);
-            return ResponseEntity.ok(updatedUser);
-        } else {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody User user) {
+        try {
+            Optional<UserDto> existingUser = userService.getUserById(id);
+            if (existingUser.isPresent()) {
+                user.setUserId(id);
+                UserDto updatedUser = userService.saveAdministrator(user);
+                return ResponseEntity.ok(updatedUser);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.ok(UserDto.builder().message(e.getMessage()).build());
         }
     }
 

@@ -1,14 +1,9 @@
 package com.techcompany.sugcm.services.impl;
 
 import com.techcompany.sugcm.models.dto.UserDto;
-import com.techcompany.sugcm.models.entity.Role;
-import com.techcompany.sugcm.models.entity.Token;
-import com.techcompany.sugcm.models.entity.User;
-import com.techcompany.sugcm.models.entity.UserRole;
-import com.techcompany.sugcm.repositories.RoleRepository;
-import com.techcompany.sugcm.repositories.TokenRepository;
-import com.techcompany.sugcm.repositories.UserRepository;
-import com.techcompany.sugcm.repositories.UserRoleRepository;
+import com.techcompany.sugcm.models.entity.*;
+import com.techcompany.sugcm.models.requests.DoctorRequest;
+import com.techcompany.sugcm.repositories.*;
 import com.techcompany.sugcm.services.UserService;
 import com.techcompany.sugcm.util.enums.TokenType;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +12,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.techcompany.sugcm.util.constants.Constants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +30,10 @@ public class UserServiceImpl implements UserService {
     private final JwtService jwtService;
     private final TokenRepository tokenRepository;
     private final ModelMapper modelMapper;
+    private final DoctorRepository doctorRepository;
+    private final DoctorSpecialtyRepository doctorSpecialtyRepository;
+    private final DoctorScheduleRepository doctorScheduleRepository;
+    private final SpecialtyRepository specialtyRepository;
 
     @Override
     public List<UserDto> getAllUsers() {
@@ -46,7 +49,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public UserDto saveUser(User user) throws Exception {
+    public UserDto saveAdministrator(User user) throws Exception {
         Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
         if (existingUser.isPresent()) {
             throw new Exception("El " + existingUser.get().getProfile() + " ya se encuentra registrado.");
@@ -59,8 +62,80 @@ public class UserServiceImpl implements UserService {
                 userRole.setUser(savedUser);
                 userRole.setRole(role.get());
                 userRoleRepository.save(userRole);
+
                 var jwtToken = jwtService.generateToken(user);
                 jwtService.generateRefreshToken(user);
+                saveUserToken(savedUser, jwtToken);
+
+                return modelMapper.map(savedUser, UserDto.class);
+            } else {
+                throw new Exception("El rol del usuario es inválido.");
+            }
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public UserDto saveDoctor(DoctorRequest doctorRequest) throws Exception {
+        Optional<User> existingUser = userRepository.findByEmail(doctorRequest.getEmail());
+        if (existingUser.isPresent()) {
+            throw new Exception("El " + existingUser.get().getProfile() + " ya se encuentra registrado.");
+        } else {
+            Optional<Role> role = roleRepository.findByName(doctorRequest.getProfile());
+            if (role.isPresent()) {
+                doctorRequest.setPassword(passwordEncoder.encode(doctorRequest.getPassword()));
+                User savedUser = userRepository.save(modelMapper.map(doctorRequest, User.class));
+                UserRole userRole = new UserRole();
+                userRole.setUser(savedUser);
+                userRole.setRole(role.get());
+                userRoleRepository.save(userRole);
+
+                var doctor = doctorRepository.save(Doctor.builder().user(savedUser).build());
+
+                if (doctorRequest.getSpecialties().isEmpty()) {
+                    throw new Exception("El doctor debe estar asociado a una espcialidad medica");
+                } else {
+                    List<DoctorSpecialty> doctorSpecialties = new ArrayList<>();
+                    for (Specialty specialty : doctorRequest.getSpecialties()) {
+                        if (specialtyRepository.findByName(specialty.getName()).isEmpty()) {
+                            throw new Exception("La especialidad enviada no esta registrada");
+                        }
+                        DoctorSpecialty doctorSpecialty = DoctorSpecialty.builder()
+                                .doctor(doctor)
+                                .specialty(specialty)
+                                .build();
+                        doctorSpecialties.add(doctorSpecialty);
+                    }
+                    doctorSpecialtyRepository.saveAll(doctorSpecialties);
+                }
+                if (doctorRequest.getDoctorSchedules().isEmpty()) {
+                    List<DoctorSchedule> doctorSchedules = new ArrayList<>();
+                    for (DayOfWeek dayOfWeek : DAY_OF_WEEK) {
+                        DoctorSchedule doctorSchedule = DoctorSchedule.builder()
+                                .doctor(doctor)
+                                .dayOfWeek(dayOfWeek)
+                                .startTime(START_TIME_WORK)
+                                .endTime(END_TIME_WORK)
+                                .build();
+                        doctorSchedules.add(doctorSchedule);
+                    }
+                    doctorScheduleRepository.saveAll(doctorSchedules);
+                } else {
+                    List<DoctorSchedule> doctorSchedules = new ArrayList<>();
+                    for (DoctorSchedule schedule : doctorRequest.getDoctorSchedules()) {
+                        DoctorSchedule doctorSchedule = DoctorSchedule.builder()
+                                .doctor(doctor)
+                                .dayOfWeek(schedule.getDayOfWeek())
+                                .startTime(schedule.getStartTime())
+                                .endTime(schedule.getEndTime())
+                                .build();
+                        doctorSchedules.add(doctorSchedule);
+                    }
+                    doctorScheduleRepository.saveAll(doctorSchedules);
+                }
+
+                var jwtToken = jwtService.generateToken(savedUser);
+                jwtService.generateRefreshToken(savedUser);
                 saveUserToken(savedUser, jwtToken);
 
                 return modelMapper.map(savedUser, UserDto.class);

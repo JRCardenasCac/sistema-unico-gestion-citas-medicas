@@ -13,9 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/sugcm/v1/auth")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
-@CrossOrigin(value = "*")
 public class AuthenticationController {
 
     private final AuthenticationService service;
@@ -44,7 +43,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<ForgotPasswordResponse> forgotPassword(@RequestBody ForgotPasswordRequest passwordRequest) throws Exception {
+    public ResponseEntity<ForgotPasswordResponse> forgotPassword(@RequestBody ForgotPasswordRequest passwordRequest) {
         try {
             return ResponseEntity.ok(service.requestNewPassword(passwordRequest.getEmail()));
         } catch (Exception e) {

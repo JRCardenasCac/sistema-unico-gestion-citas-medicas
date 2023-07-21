@@ -7,7 +7,8 @@ logging:
 server:
   port: 8080  # Puerto en el que se ejecutará el servidor web
   servlet:
-    context-path: / # Ruta base para las solicitudes HTTP
+    context-path: /sugcm/v1/ # Ruta base para las solicitudes HTTP
+
 spring:
   application:
     name: sistema-unico-gestion-citas-medicas # Nombre de la aplicación
@@ -19,7 +20,7 @@ spring:
     driver-class-name: org.postgresql.Driver  # Clase del controlador de la base de datos
   jpa:
     hibernate:
-      ddl-auto: create-drop # Acción de actualización del esquema de la base de datos
+      ddl-auto: create-drop # Acción de actualización del esquema de la base de datos create-drop
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect # Dialecto de Hibernate para PostgreSQL
@@ -28,6 +29,12 @@ spring:
   main:
     banner-mode: off  # Desactivar el banner de inicio de Spring Boot
   # Configuración de CORS (si es necesario permitir el acceso cruzado a recursos)
+  cors:
+    allowed-origins: "*" # Comma-separated list of allowed origin URLs
+    allowed-methods: "GET, POST, PUT, DELETE, OPTIONS" # Comma-separated list of allowed HTTP methods
+    allowed-headers: "*" # Comma-separated list of allowed request headers
+    allow-credentials: true # Whether to allow credentials (e.g., cookies) to be sent in CORS requests
+    max-age: 3600 # How long (in seconds) the results of a preflight request can be cached
   webflux:
     cors:
       allowed-origins: '*'  # Permitir el acceso desde cualquier origen (para desarrollo)

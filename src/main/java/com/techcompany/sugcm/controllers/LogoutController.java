@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/sugcm/v1/logout")
+@RequestMapping("/logout")
 @RequiredArgsConstructor
 public class LogoutController {
 

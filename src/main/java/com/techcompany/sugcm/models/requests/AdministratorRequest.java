@@ -1,16 +1,13 @@
-package com.techcompany.sugcm.models.dto;
+package com.techcompany.sugcm.models.requests;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Builder
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
-public class UserDto {
-    private Long userId;
+public class AdministratorRequest {
     private String name;
     private String lastname;
     private String mobilePhone;
@@ -21,5 +18,4 @@ public class UserDto {
     private LocalDateTime creationDate;
     private String userModification;
     private LocalDateTime modificationDate;
-    private String message;
 }

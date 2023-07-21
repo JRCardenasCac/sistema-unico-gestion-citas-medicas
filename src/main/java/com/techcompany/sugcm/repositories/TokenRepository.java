@@ -1,7 +1,6 @@
 package com.techcompany.sugcm.repositories;
 
 import com.techcompany.sugcm.models.entity.Token;
-import com.techcompany.sugcm.models.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

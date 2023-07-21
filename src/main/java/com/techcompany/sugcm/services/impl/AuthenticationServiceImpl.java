@@ -5,14 +5,8 @@ import com.techcompany.sugcm.models.auth.AuthenticationRequest;
 import com.techcompany.sugcm.models.auth.AuthenticationResponse;
 import com.techcompany.sugcm.models.auth.ForgotPasswordResponse;
 import com.techcompany.sugcm.models.auth.RegisterRequest;
-import com.techcompany.sugcm.models.entity.Role;
-import com.techcompany.sugcm.models.entity.Token;
-import com.techcompany.sugcm.models.entity.User;
-import com.techcompany.sugcm.models.entity.UserRole;
-import com.techcompany.sugcm.repositories.RoleRepository;
-import com.techcompany.sugcm.repositories.TokenRepository;
-import com.techcompany.sugcm.repositories.UserRepository;
-import com.techcompany.sugcm.repositories.UserRoleRepository;
+import com.techcompany.sugcm.models.entity.*;
+import com.techcompany.sugcm.repositories.*;
 import com.techcompany.sugcm.services.AuthenticationService;
 import com.techcompany.sugcm.util.enums.TokenType;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,6 +34,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final TokenRepository tokenRepository;
     private final EmailService emailService;
+    private final PatientRepository patientRepository;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -63,6 +58,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 userRole.setUser(savedUser);
                 userRole.setRole(role.get());
                 userRoleRepository.save(userRole);
+
+                patientRepository.save(Patient.builder().user(savedUser).build());
+
                 var jwtToken = jwtService.generateToken(user);
                 var refreshToken = jwtService.generateRefreshToken(user);
                 saveUserToken(savedUser, jwtToken);

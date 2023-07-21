@@ -1,5 +1,6 @@
 package com.techcompany.sugcm.services;
 
+import com.techcompany.sugcm.models.requests.DoctorRequest;
 import com.techcompany.sugcm.models.dto.UserDto;
 import com.techcompany.sugcm.models.entity.User;
 
@@ -11,7 +12,9 @@ public interface UserService {
 
     Optional<UserDto> getUserById(Long id);
 
-    UserDto saveUser(User user) throws Exception;
+    UserDto saveAdministrator(User user) throws Exception;
+
+    UserDto saveDoctor(DoctorRequest doctorRequest) throws Exception;
 
     void deleteUser(Long id);
 }
