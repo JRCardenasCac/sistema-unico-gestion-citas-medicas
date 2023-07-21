@@ -1,6 +1,7 @@
 package com.techcompany.sugcm.models.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.techcompany.sugcm.models.dto.UserDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,5 +16,6 @@ public class AuthenticationResponse {
     private String accessToken;
     @JsonProperty("refresh_token")
     private String refreshToken;
+    private UserDto userDto;
     private String message;
 }

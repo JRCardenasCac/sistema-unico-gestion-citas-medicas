@@ -1,12 +1,11 @@
 package com.techcompany.sugcm.services.impl;
 
 import com.techcompany.sugcm.models.dto.AppointmentDto;
-import com.techcompany.sugcm.models.entity.Appointment;
-import com.techcompany.sugcm.models.entity.Doctor;
-import com.techcompany.sugcm.models.entity.DoctorSchedule;
-import com.techcompany.sugcm.models.entity.Patient;
+import com.techcompany.sugcm.models.dto.PatientDto;
+import com.techcompany.sugcm.models.entity.*;
 import com.techcompany.sugcm.repositories.AppointmentRepository;
 import com.techcompany.sugcm.repositories.DoctorScheduleRepository;
+import com.techcompany.sugcm.repositories.PatientRepository;
 import com.techcompany.sugcm.services.AppointmentService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -25,6 +24,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final ModelMapper modelMapper;
     private final DoctorScheduleRepository doctorScheduleRepository;
+    private final PatientRepository patientRepository;
 
     @Override
     public List<AppointmentDto> getAllAppointments() {
@@ -58,8 +58,14 @@ public class AppointmentServiceImpl implements AppointmentService {
     public AppointmentDto saveAppointment(AppointmentDto appointmentDto) throws Exception {
         try {
             if (isDoctorAvailable(modelMapper.map(appointmentDto, Appointment.class))) {
-                var appointment = appointmentRepository.save(modelMapper.map(appointmentDto, Appointment.class));
-                return modelMapper.map(appointment, AppointmentDto.class);
+                var patient = patientRepository.findByUser(User.builder().userId(appointmentDto.getUserId()).build());
+                if (patient.isPresent()) {
+                    appointmentDto.setPatient(modelMapper.map(patient.get(), PatientDto.class));
+                    var appointment = appointmentRepository.save(modelMapper.map(appointmentDto, Appointment.class));
+                    return modelMapper.map(appointment, AppointmentDto.class);
+                } else {
+                    throw new Exception("No puede registrar la cita porque no tiene el rol del paciente.");
+                }
             }
             throw new Exception("La fecha y el rango horario seleccionados estan ocupados.");
         } catch (Exception e) {

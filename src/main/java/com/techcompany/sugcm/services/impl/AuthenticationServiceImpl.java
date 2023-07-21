@@ -5,6 +5,7 @@ import com.techcompany.sugcm.models.auth.AuthenticationRequest;
 import com.techcompany.sugcm.models.auth.AuthenticationResponse;
 import com.techcompany.sugcm.models.auth.ForgotPasswordResponse;
 import com.techcompany.sugcm.models.auth.RegisterRequest;
+import com.techcompany.sugcm.models.dto.UserDto;
 import com.techcompany.sugcm.models.entity.*;
 import com.techcompany.sugcm.repositories.*;
 import com.techcompany.sugcm.services.AuthenticationService;
@@ -12,6 +13,7 @@ import com.techcompany.sugcm.util.enums.TokenType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -35,6 +37,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final TokenRepository tokenRepository;
     private final EmailService emailService;
     private final PatientRepository patientRepository;
+    private final ModelMapper modelMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -68,6 +71,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 return AuthenticationResponse.builder()
                         .accessToken(jwtToken)
                         .refreshToken(refreshToken)
+                        .userDto(modelMapper.map(savedUser, UserDto.class))
                         .build();
             } else {
                 throw new Exception("El rol del usuario es inválido.");
@@ -91,6 +95,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
+                .userDto(modelMapper.map(user, UserDto.class))
                 .build();
     }
 

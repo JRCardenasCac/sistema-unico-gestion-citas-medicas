@@ -22,5 +22,7 @@ public class AppointmentDto {
     private String notes;
     private AppointmentStatus status;
     private DoctorScheduleDto doctorSchedule;
+    private Long userId;
+    private SpecialtyDto specialty;
     private String message;
 }

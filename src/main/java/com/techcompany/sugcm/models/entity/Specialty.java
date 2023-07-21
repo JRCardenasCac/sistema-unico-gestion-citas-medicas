@@ -22,4 +22,7 @@ public class Specialty {
 
     @ManyToMany(mappedBy = "specialties")
     private List<Doctor> doctors; // Lista de médicos con esta especialidad
+
+    @OneToMany(mappedBy = "specialty")
+    private List<Appointment> appointments; // Lista de citas asociadas a esta especialidad
 }

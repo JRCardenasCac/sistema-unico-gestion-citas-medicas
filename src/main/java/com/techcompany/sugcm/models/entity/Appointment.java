@@ -40,6 +40,10 @@ public class Appointment {
     private AppointmentStatus status; // Estado de la cita (pendiente, completada, cancelada, etc.)
 
     @ManyToOne
+    @JoinColumn(name = "specialty_id", nullable = false)
+    private Specialty specialty; // Especialidad de la cita
+
+    @ManyToOne
     @JoinColumn(name = "doctor_schedule_id", nullable = false)
     private DoctorSchedule doctorSchedule;
 }
