@@ -1,7 +1,9 @@
 package com.techcompany.sugcm.controllers;
 
+import com.techcompany.sugcm.models.dto.DoctorDto;
 import com.techcompany.sugcm.models.dto.SpecialtyDto;
 import com.techcompany.sugcm.models.entity.Specialty;
+import com.techcompany.sugcm.repositories.DoctorRepository;
 import com.techcompany.sugcm.repositories.SpecialtyRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SpecialtyController {
     private final SpecialtyRepository specialtyRepository;
+    private final DoctorRepository doctorRepository;
     private final ModelMapper modelMapper;
 
     @GetMapping
@@ -32,6 +35,13 @@ public class SpecialtyController {
                 .map(e -> modelMapper.map(e, SpecialtyDto.class))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{specialtyId}/doctors")
+    public ResponseEntity<List<DoctorDto>> getDoctorsBySpecialtyId(@PathVariable Long specialtyId) {
+        return ResponseEntity.ok(doctorRepository.findBySpecialtyId(specialtyId).stream()
+                .map(d -> modelMapper.map(d, DoctorDto.class))
+                .collect(Collectors.toList()));
     }
 
     @PostMapping
